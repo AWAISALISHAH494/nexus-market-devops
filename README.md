@@ -424,12 +424,12 @@ The project is being developed incrementally to cover the complete DevOps lifecy
 ### Phase 1 — Application Development
 
 - [x] Project architecture
-- [ ] Authentication service
-- [ ] Catalog service
-- [ ] Order service
-- [ ] Payment service
-- [ ] Notification service
-- [ ] React frontend
+- [x] Authentication service
+- [x] Catalog service
+- [x] Order service
+- [x] Payment service
+- [x] Notification service
+- [x] React frontend
 - [ ] PostgreSQL integration
 - [ ] Redis integration
 
