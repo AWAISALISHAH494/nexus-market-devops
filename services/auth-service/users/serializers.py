@@ -10,7 +10,17 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'email', 'password', 'password_confirm', 'role']
         extra_kwargs = {
-            'password': {'write_only': True}
+            'password': {'write_only': True},
+            'email': {
+                'error_messages': {
+                    'unique': "Account already exists with this email."
+                }
+            },
+            'username': {
+                'error_messages': {
+                    'unique': "Username already taken."
+                }
+            }
         }
 
     def validate(self, attrs):
