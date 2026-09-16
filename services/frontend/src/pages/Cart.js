@@ -31,39 +31,40 @@ const Cart = () => {
       <div className="cart-content">
         <div className="cart-items">
           {items.map((item) => (
-            <div key={item.id} className="cart-item">
+            <div key={item.product.id} className="cart-item">
               <div className="cart-item-image">
-                {item.image ? (
-                  <img src={item.image} alt={item.name} />
+                {(item.product.image || (item.product.images && item.product.images.length > 0)) ? (
+                  <img src={item.product.image || item.product.images[0]} alt={item.product.name} />
                 ) : (
                   <div className="cart-item-placeholder">📦</div>
                 )}
               </div>
               <div className="cart-item-details">
-                <Link to={`/product/${item.id}`} className="cart-item-name">{item.name}</Link>
-                <span className="cart-item-price">${parseFloat(item.price).toFixed(2)}</span>
+                <Link to={`/products/${item.product.id}`} className="cart-item-name">{item.product.name}</Link>
+                <span className="cart-item-price">${parseFloat(item.product.price).toFixed(2)}</span>
               </div>
               <div className="cart-item-quantity">
                 <button
                   className="cart-qty-btn"
-                  onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                  onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
                 >
                   <FiMinus />
                 </button>
                 <span className="cart-qty-value">{item.quantity}</span>
                 <button
                   className="cart-qty-btn"
-                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                  onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                  disabled={item.quantity >= (item.product.stock || 10)}
                 >
                   <FiPlus />
                 </button>
               </div>
               <div className="cart-item-total">
-                ${(parseFloat(item.price) * item.quantity).toFixed(2)}
+                ${(parseFloat(item.product.price) * item.quantity).toFixed(2)}
               </div>
               <button
                 className="cart-item-remove"
-                onClick={() => removeFromCart(item.id)}
+                onClick={() => removeFromCart(item.product.id)}
               >
                 <FiTrash2 />
               </button>

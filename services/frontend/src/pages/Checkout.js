@@ -47,11 +47,11 @@ const Checkout = () => {
       // 1. Create order
       const orderPayload = {
         items: items.map((item) => ({
-          product_id: String(item.id),
-          name: item.name,
-          price: parseFloat(item.price),
+          product_id: String(item.product.id),
+          name: item.product.name,
+          price: parseFloat(item.product.price),
           quantity: item.quantity,
-          image: item.image || '',
+          image: item.product.image || (item.product.images && item.product.images[0]) || '',
         })),
         shipping_address: shipping,
         total_amount: grandTotal,
@@ -75,7 +75,9 @@ const Checkout = () => {
       navigate('/orders');
     } catch (error) {
       console.error('Checkout error:', error);
-      toast.error(error.response?.data?.message || 'Failed to place order. Please try again.');
+      const errData = error.response?.data;
+      const errMsg = errData?.error || errData?.message || error.message || 'Failed to place order. Please try again.';
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
@@ -225,12 +227,14 @@ const Checkout = () => {
             <h3>Order Summary</h3>
             <div className="checkout-summary-items">
               {items.map((item) => (
-                <div key={item.id} className="checkout-summary-item">
+                <div key={item.product.id} className="checkout-summary-item">
                   <div className="checkout-summary-item-info">
-                    <span className="checkout-summary-item-name">{item.name}</span>
-                    <span className="checkout-summary-item-qty">×{item.quantity}</span>
+                    <span className="checkout-summary-item-name">{item.product.name}</span>
+                    <span className="checkout-summary-item-details" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                      ${parseFloat(item.product.price).toFixed(2)} each × {item.quantity}
+                    </span>
                   </div>
-                  <span>${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
+                  <span>${(parseFloat(item.product.price) * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
             </div>

@@ -18,8 +18,8 @@ const OrderHistory = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await orderAPI.getUserOrders();
-      setOrders(response.data || []);
+      const response = await orderAPI.getOrders();
+      setOrders(response.data?.orders || []);
     } catch (err) {
       console.error('Error fetching orders:', err);
       setError('Failed to load your order history.');
@@ -166,7 +166,16 @@ const OrderHistory = () => {
                     <div className="order-actions">
                       <div className="shipping-info">
                         <h4>Shipping Address</h4>
-                        <p>{order.shipping_address || 'Address not provided'}</p>
+                        {order.shipping_address && typeof order.shipping_address === 'object' ? (
+                          <div className="address-details">
+                            <p>{order.shipping_address.full_name}</p>
+                            <p>{order.shipping_address.address_line1} {order.shipping_address.address_line2 || ''}</p>
+                            <p>{order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.zip_code}</p>
+                            <p>{order.shipping_address.country}</p>
+                          </div>
+                        ) : (
+                          <p>{order.shipping_address || 'Address not provided'}</p>
+                        )}
                       </div>
                       
                       {['pending', 'confirmed'].includes(order.status.toLowerCase()) && (

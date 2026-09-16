@@ -58,14 +58,14 @@ export const orderAPI = {
   getOrders: () => api.get(ORDER_URL),
   getOrder: (id) => api.get(`${ORDER_URL}/${id}`),
   updateOrderStatus: (id, status) => api.patch(`${ORDER_URL}/${id}/status`, { status }),
-  cancelOrder: (id) => api.post(`${ORDER_URL}/${id}/cancel`),
+  cancelOrder: (id) => api.delete(`${ORDER_URL}/${id}`),
 };
 
 export const paymentAPI = {
-  processPayment: (data) => api.post(PAYMENT_URL, data),
+  processPayment: (data) => api.post(`${PAYMENT_URL}/process`, data),
   getPayment: (id) => api.get(`${PAYMENT_URL}/${id}`),
   getPaymentByOrder: (orderId) => api.get(`${PAYMENT_URL}/order/${orderId}`),
-  getUserPayments: () => api.get(PAYMENT_URL),
+  getUserPayments: () => api.get(`${PAYMENT_URL}/user`),
 };
 
 export const notificationAPI = {
