@@ -35,11 +35,11 @@ const PAYMENT_URL = 'http://localhost:3004/api/payments';
 const NOTIFICATION_URL = 'http://localhost:3005/api/notifications';
 
 export const authAPI = {
-  login: (data) => api.post(`${AUTH_URL}/login`, data),
-  register: (data) => api.post(`${AUTH_URL}/register`, data),
-  getProfile: () => api.get(`${AUTH_URL}/profile`),
-  updateProfile: (data) => api.put(`${AUTH_URL}/profile`, data),
-  validateToken: () => api.get(`${AUTH_URL}/validate`),
+  login: (data) => api.post(`${AUTH_URL}/login/`, data),
+  register: (data) => api.post(`${AUTH_URL}/register/`, data),
+  getProfile: () => api.get(`${AUTH_URL}/profile/`),
+  updateProfile: (data) => api.put(`${AUTH_URL}/profile/`, data),
+  validateToken: () => api.post(`${AUTH_URL}/validate/`),
 };
 
 export const catalogAPI = {

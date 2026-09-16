@@ -20,11 +20,15 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await login({ email, password });
-      toast.success('Successfully logged in!');
-      navigate(from, { replace: true });
+      const result = await login(email, password);
+      if (result.success) {
+        toast.success('Successfully logged in!');
+        navigate(from, { replace: true });
+      } else {
+        toast.error(result.error || 'Failed to login. Please check your credentials.');
+      }
     } catch (error) {
-      toast.error(error.message || 'Failed to login. Please check your credentials.');
+      toast.error('An unexpected error occurred.');
     } finally {
       setIsLoading(false);
     }

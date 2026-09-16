@@ -33,16 +33,21 @@ const Register = () => {
     
     setIsLoading(true);
     try {
-      await register({
+      const result = await register({
         username: formData.username,
         email: formData.email,
         password: formData.password,
+        password_confirm: formData.confirmPassword,
         role: formData.role
       });
-      toast.success('Registration successful! Welcome to Nexus Market.');
-      navigate('/');
+      if (result.success) {
+        toast.success('Registration successful! Welcome to Nexus Market.');
+        navigate('/');
+      } else {
+        toast.error(result.error || 'Registration failed. Please try again.');
+      }
     } catch (error) {
-      toast.error(error.message || 'Registration failed. Please try again.');
+      toast.error('An unexpected error occurred.');
     } finally {
       setIsLoading(false);
     }

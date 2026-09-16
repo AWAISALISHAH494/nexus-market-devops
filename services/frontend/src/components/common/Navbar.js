@@ -66,12 +66,10 @@ const Navbar = () => {
 
         {/* Desktop Actions */}
         <div className="navbar-actions desktop-only">
-          {user && (
-            <Link to="/cart" className="action-icon">
-              <FiShoppingCart />
-              {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-            </Link>
-          )}
+          <Link to="/cart" className="action-icon">
+            <FiShoppingCart />
+            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+          </Link>
           
           <div className="user-dropdown-container">
             <button 
@@ -139,12 +137,12 @@ const Navbar = () => {
           
           <div className="mobile-links">
             <Link to="/products" onClick={() => setIsMobileMenuOpen(false)}>Products</Link>
+            <Link to="/cart" onClick={() => setIsMobileMenuOpen(false)}>
+              Cart {cartCount > 0 && <span className="mobile-cart-count">({cartCount})</span>}
+            </Link>
             
             {user ? (
               <>
-                <Link to="/cart" onClick={() => setIsMobileMenuOpen(false)}>
-                  Cart {cartCount > 0 && <span className="mobile-cart-count">({cartCount})</span>}
-                </Link>
                 <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)}>Profile</Link>
                 <Link to="/orders" onClick={() => setIsMobileMenuOpen(false)}>Orders</Link>
                 <button onClick={handleLogout} className="mobile-logout">Logout</button>
