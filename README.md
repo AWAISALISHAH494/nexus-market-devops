@@ -430,14 +430,14 @@ The project is being developed incrementally to cover the complete DevOps lifecy
 - [x] Payment service
 - [x] Notification service
 - [x] React frontend
-- [ ] PostgreSQL integration
+- [x] PostgreSQL integration
 - [ ] Redis integration
 
 ### Phase 2 — Containerization
 
-- [ ] Dockerfile for each service
+- [x] Dockerfile for each service
 - [ ] Multi-stage Docker builds
-- [ ] Docker Compose
+- [x] Docker Compose
 - [ ] Service networking
 - [ ] Environment-based configuration
 - [ ] Production-oriented container configuration
