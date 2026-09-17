@@ -15,6 +15,9 @@ const ProductList = () => {
   const [error, setError] = useState(null);
   
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
   const [filters, setFilters] = useState({
     categories: categoryQuery ? [categoryQuery] : [],
     minPrice: '',
@@ -75,6 +78,7 @@ const ProductList = () => {
       }
       
       setProducts(filtered);
+      setCurrentPage(1);
     } catch (err) {
       console.error('Failed to fetch products:', err);
       setError('Failed to load products. Please try again later.');
@@ -85,7 +89,8 @@ const ProductList = () => {
 
   // Re-apply client filters when filter state changes
   useEffect(() => {
-    if (!loading && products.length > 0) {
+    // Only re-fetch if we are not currently loading
+    if (!loading) {
       fetchProducts();
     }
   }, [filters]);
@@ -103,6 +108,9 @@ const ProductList = () => {
     const { name, value } = e.target;
     setFilters(prev => ({ ...prev, [name]: value }));
   };
+
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const paginatedProducts = products.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const SkeletonCard = () => (
     <div className="product-card skeleton">
@@ -139,6 +147,19 @@ const ProductList = () => {
           <div className="sidebar-header mobile-only">
             <h3>Filters</h3>
             <button onClick={() => setIsMobileFiltersOpen(false)}><FiX /></button>
+          </div>
+          
+          <div className="sidebar-clear" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 className="desktop-only" style={{ margin: 0, fontSize: '1.2rem' }}>Filters</h3>
+            <button 
+              style={{ background: 'none', border: 'none', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: '500', padding: 0 }}
+              onClick={() => {
+                setFilters({ categories: [], minPrice: '', maxPrice: '', sort: 'newest' });
+                setSearchParams({});
+              }}
+            >
+              Clear All
+            </button>
           </div>
           
           <div className="filter-group">
@@ -205,9 +226,9 @@ const ProductList = () => {
             <div className="product-grid">
               {[...Array(8)].map((_, i) => <SkeletonCard key={i} />)}
             </div>
-          ) : products.length > 0 ? (
+          ) : paginatedProducts.length > 0 ? (
             <div className="product-grid">
-              {products.map(product => (
+              {paginatedProducts.map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
@@ -228,14 +249,32 @@ const ProductList = () => {
             </div>
           )}
 
-          {/* Simple Pagination */}
-          {!loading && products.length > 0 && (
+          {/* Dynamic Pagination */}
+          {!loading && totalPages > 1 && (
             <div className="pagination">
-              <button className="page-btn" disabled>Prev</button>
-              <button className="page-btn active">1</button>
-              <button className="page-btn">2</button>
-              <button className="page-btn">3</button>
-              <button className="page-btn">Next</button>
+              <button 
+                className="page-btn" 
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              >
+                Prev
+              </button>
+              {[...Array(totalPages)].map((_, i) => (
+                <button 
+                  key={i + 1} 
+                  className={`page-btn ${currentPage === i + 1 ? 'active' : ''}`}
+                  onClick={() => setCurrentPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button 
+                className="page-btn" 
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              >
+                Next
+              </button>
             </div>
           )}
         </div>

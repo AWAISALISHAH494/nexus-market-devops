@@ -49,6 +49,12 @@ const Navbar = () => {
           <span className="logo-market">MARKET</span>
         </Link>
 
+        {/* Navigation Links */}
+        <nav className="navbar-links desktop-only" style={{ display: 'flex', gap: '1.5rem', marginLeft: '2rem', fontWeight: '500' }}>
+          <Link to="/" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Home</Link>
+          <Link to="/products" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Shop</Link>
+        </nav>
+
         {/* Desktop Search */}
         <div className="navbar-search desktop-only">
           <form onSubmit={handleSearchSubmit}>
@@ -74,9 +80,21 @@ const Navbar = () => {
           <div className="user-dropdown-container">
             <button 
               className="action-icon"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
             >
-              <FiUser />
+              {user ? (
+                <div style={{
+                  width: '32px', height: '32px', borderRadius: '50%', 
+                  background: 'var(--primary-color)', color: 'white', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '1.1rem', fontWeight: 'bold', textTransform: 'uppercase'
+                }}>
+                  {user.username ? user.username.charAt(0) : 'U'}
+                </div>
+              ) : (
+                <FiUser size={22} />
+              )}
             </button>
             
             {isUserMenuOpen && (

@@ -21,6 +21,7 @@ import Checkout from './pages/Checkout';
 import OrderHistory from './components/orders/OrderHistory';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+import Profile from './pages/Profile';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -58,6 +59,11 @@ const AppContent = () => {
           <Route path="/cart" element={
             <ProtectedRoute>
               <Cart />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           } />
         </Routes>
