@@ -18,7 +18,7 @@ const createOrder = async (req, res) => {
       return sum + (item.price * item.quantity);
     }, 0);
 
-    const order = new Order({
+    const order = await Order.create({
       user_id: req.user.user_id,
       items,
       shipping_address,
@@ -27,13 +27,11 @@ const createOrder = async (req, res) => {
       notes
     });
 
-    await order.save();
-
     // Fire-and-forget notification
     if (process.env.NOTIFICATION_SERVICE_URL) {
       axios.post(`${process.env.NOTIFICATION_SERVICE_URL}/notify`, {
         event: 'ORDER_CREATED',
-        order_id: order._id,
+        order_id: order.id,
         user_id: order.user_id
       }).catch(err => {
         console.error('Failed to send notification:', err.message);
@@ -56,8 +54,13 @@ const getUserOrders = async (req, res) => {
     const query = { user_id: req.user.user_id };
 
     const [orders, total] = await Promise.all([
-      Order.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
-      Order.countDocuments(query)
+      Order.findAll({ 
+        where: query, 
+        order: [['createdAt', 'DESC']], 
+        offset: skip, 
+        limit: limit 
+      }),
+      Order.count({ where: query })
     ]);
 
     const pages = Math.ceil(total / limit);
@@ -79,7 +82,7 @@ const getUserOrders = async (req, res) => {
 
 const getOrderById = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findByPk(req.params.id);
     
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
@@ -109,7 +112,7 @@ const updateOrderStatus = async (req, res) => {
       return res.status(400).json({ error: 'Invalid status' });
     }
 
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findByPk(req.params.id);
     
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
@@ -122,7 +125,7 @@ const updateOrderStatus = async (req, res) => {
     if (process.env.NOTIFICATION_SERVICE_URL) {
       axios.post(`${process.env.NOTIFICATION_SERVICE_URL}/notify`, {
         event: 'ORDER_STATUS_UPDATED',
-        order_id: order._id,
+        order_id: order.id,
         user_id: order.user_id,
         status: order.status
       }).catch(err => {
@@ -139,7 +142,7 @@ const updateOrderStatus = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findByPk(req.params.id);
     
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });

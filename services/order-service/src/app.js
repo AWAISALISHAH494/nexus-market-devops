@@ -1,5 +1,5 @@
 const express = require('express');
-const mongoose = require('mongoose');
+const { Sequelize } = require('sequelize');
 const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -12,17 +12,19 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/orders';
+const sequelize = require('./db');
 
-mongoose.connect(mongoURI);
-
-mongoose.connection.on('connected', () => {
-  console.log('Connected to MongoDB');
-});
-
-mongoose.connection.on('error', (err) => {
-  console.error('MongoDB connection error:', err);
-});
+sequelize.authenticate()
+  .then(() => {
+    console.log('Connected to PostgreSQL (order-service)');
+    return sequelize.sync();
+  })
+  .then(() => {
+    console.log('Models synchronized');
+  })
+  .catch(err => {
+    console.error('PostgreSQL connection error:', err);
+  });
 
 app.use('/api/orders', orderRoutes);
 
