@@ -7,6 +7,20 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: nexus_market
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -31,6 +45,8 @@ jobs:
         run: cd services/notification-service && npm install && NODE_ENV=test npm test
 
       - name: Test Auth Service
+        env:
+          POSTGRES_HOST: localhost
         run: |
           cd services/auth-service
           python -m pip install --upgrade pip
@@ -38,6 +54,8 @@ jobs:
           python manage.py test
 
       - name: Test Catalog Service
+        env:
+          POSTGRES_HOST: localhost
         run: |
           cd services/catalog-service
           python -m pip install --upgrade pip
