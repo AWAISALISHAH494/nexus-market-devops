@@ -15,7 +15,7 @@ class UserAuthTests(APITestCase):
         }
 
     def test_user_registration(self):
-        url = '/api/users/register/'
+        url = '/api/auth/register/'
         response = self.client.post(url, self.user_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['username'], self.user_data['username'])
@@ -25,7 +25,7 @@ class UserAuthTests(APITestCase):
         # Register first
         User.objects.create_user(**self.user_data)
         
-        url = '/api/users/login/'
+        url = '/api/auth/login/'
         login_data = {
             'username': 'testuser',
             'password': 'strongpassword123'
@@ -39,7 +39,7 @@ class UserAuthTests(APITestCase):
         user = User.objects.create_user(**self.user_data)
         self.client.force_authenticate(user=user)
         
-        url = '/api/users/profile/'
+        url = '/api/auth/profile/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['username'], 'testuser')
