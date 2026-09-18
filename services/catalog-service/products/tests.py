@@ -20,7 +20,8 @@ class ProductTests(APITestCase):
             price=599.99,
             stock=100,
             is_active=True,
-            seller_id=1
+            seller_id=1,
+            sku="PHONE-123"
         )
         
         # We need an admin user to test creation
