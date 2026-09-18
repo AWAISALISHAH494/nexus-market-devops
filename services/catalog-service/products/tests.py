@@ -54,7 +54,9 @@ class ProductTests(APITestCase):
             'slug': 'laptop',
             'price': 999.99,
             'stock': 50,
-            'seller_id': 1
+            'seller_id': 1,
+            'description': 'A very fast laptop',
+            'sku': 'LAPTOP-123'
         }
         response = self.client.post(url, data, format='json')
         # DRF returns 403 Forbidden or 401 Unauthorized depending on auth setup
@@ -68,7 +70,9 @@ class ProductTests(APITestCase):
             'slug': 'laptop',
             'price': 999.99,
             'stock': 50,
-            'seller_id': 1
+            'seller_id': 1,
+            'description': 'A very fast laptop',
+            'sku': 'LAPTOP-456'
         }
         self.client.force_authenticate(user=self.admin_user)
         response = self.client.post(url, data, format='json')
