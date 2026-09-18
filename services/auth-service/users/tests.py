@@ -10,6 +10,7 @@ class UserAuthTests(APITestCase):
             'username': 'testuser',
             'email': 'test@example.com',
             'password': 'strongpassword123',
+            'password_confirm': 'strongpassword123',
             'first_name': 'Test',
             'last_name': 'User'
         }
@@ -27,13 +28,12 @@ class UserAuthTests(APITestCase):
         
         url = '/api/auth/login/'
         login_data = {
-            'username': 'testuser',
+            'email': 'test@example.com',
             'password': 'strongpassword123'
         }
         response = self.client.post(url, login_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('access', response.data)
-        self.assertIn('refresh', response.data)
+        self.assertIn('token', response.data)
 
     def test_get_user_profile(self):
         user = User.objects.create_user(**self.user_data)
