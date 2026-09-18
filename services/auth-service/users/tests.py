@@ -10,16 +10,19 @@ class UserAuthTests(APITestCase):
             'username': 'testuser',
             'email': 'test@example.com',
             'password': 'strongpassword123',
-            'password_confirm': 'strongpassword123',
             'first_name': 'Test',
             'last_name': 'User'
+        }
+        self.register_data = {
+            **self.user_data,
+            'password_confirm': 'strongpassword123'
         }
 
     def test_user_registration(self):
         url = '/api/auth/register/'
-        response = self.client.post(url, self.user_data, format='json')
+        response = self.client.post(url, self.register_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['username'], self.user_data['username'])
+        self.assertEqual(response.data['user']['username'], self.register_data['username'])
         self.assertEqual(User.objects.count(), 1)
 
     def test_user_login(self):
