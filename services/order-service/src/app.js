@@ -37,9 +37,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-const PORT = process.env.PORT || 3003;
-app.listen(PORT, () => {
-  console.log(`Order service listening on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = process.env.PORT || 3003;
+  app.listen(PORT, () => {
+    console.log(`Order service listening on port ${PORT}`);
+  });
+}
 
 module.exports = app;

@@ -44,7 +44,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3004;
-if (require.main === module) {
+if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`Payment service listening on port ${PORT}`);
   });

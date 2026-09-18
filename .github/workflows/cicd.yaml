@@ -5,7 +5,47 @@ on:
   pull_request:
     branches: ["main","develop","master"]
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Test Order Service
+        run: cd services/order-service && npm install && NODE_ENV=test npm test
+
+      - name: Test Payment Service
+        run: cd services/payment-service && npm install && NODE_ENV=test npm test
+
+      - name: Test Notification Service
+        run: cd services/notification-service && npm install && NODE_ENV=test npm test
+
+      - name: Test Auth Service
+        run: |
+          cd services/auth-service
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python manage.py test
+
+      - name: Test Catalog Service
+        run: |
+          cd services/catalog-service
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python manage.py test
+
   build:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code

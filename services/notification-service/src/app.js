@@ -44,9 +44,9 @@ app.use((err, req, res, next) => {
 
 // Start Server
 const PORT = process.env.PORT || 3005;
-if (require.main === module) {
+if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
-    console.log(`Notification service running on port ${PORT}`);
+    console.log(`Notification service listening on port ${PORT}`);
   });
 }
 
