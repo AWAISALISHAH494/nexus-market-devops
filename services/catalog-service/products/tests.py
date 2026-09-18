@@ -19,7 +19,8 @@ class ProductTests(APITestCase):
             description="A very smart phone",
             price=599.99,
             stock=100,
-            is_active=True
+            is_active=True,
+            seller_id=1
         )
         
         # We need an admin user to test creation
@@ -49,7 +50,8 @@ class ProductTests(APITestCase):
             'name': 'Laptop',
             'slug': 'laptop',
             'price': 999.99,
-            'stock': 50
+            'stock': 50,
+            'seller_id': 1
         }
         response = self.client.post(url, data, format='json')
         # DRF returns 401 Unauthorized if not authenticated
@@ -62,7 +64,8 @@ class ProductTests(APITestCase):
             'name': 'Laptop',
             'slug': 'laptop',
             'price': 999.99,
-            'stock': 50
+            'stock': 50,
+            'seller_id': 1
         }
         self.client.force_authenticate(user=self.admin_user)
         response = self.client.post(url, data, format='json')
