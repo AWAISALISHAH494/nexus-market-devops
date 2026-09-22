@@ -26,6 +26,10 @@ sequelize.authenticate()
     console.error('PostgreSQL connection error:', err);
   });
 
+const { connectRedis } = require('./redis');
+connectRedis().catch(console.error);
+
+
 app.use('/api/orders', orderRoutes);
 
 app.get('/health', (req, res) => {

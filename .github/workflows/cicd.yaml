@@ -21,6 +21,16 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -37,12 +47,16 @@ jobs:
 
       - name: Test Order Service
         run: cd services/order-service && npm install && NODE_ENV=test npm test
+        env:
+          REDIS_URL: redis://localhost:6379/0
 
       - name: Test Payment Service
         run: cd services/payment-service && npm install && NODE_ENV=test npm test
 
       - name: Test Notification Service
         run: cd services/notification-service && npm install && NODE_ENV=test npm test
+        env:
+          REDIS_URL: redis://localhost:6379/0
 
       - name: Test Auth Service
         env:
@@ -56,6 +70,7 @@ jobs:
       - name: Test Catalog Service
         env:
           POSTGRES_HOST: localhost
+          REDIS_URL: redis://localhost:6379/0
         run: |
           cd services/catalog-service
           python -m pip install --upgrade pip
@@ -122,4 +137,4 @@ jobs:
           tags: nexusmarket/frontend:latest
       
       - name: All services built successfully
-        run: echo "✅ All services built successfully!"
+        run: echo " All services built successfully!"

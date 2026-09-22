@@ -23,6 +23,9 @@ sequelize.authenticate()
     console.error('PostgreSQL connection error:', err);
   });
 
+const { connectRedis } = require('./redis');
+connectRedis().catch(console.error);
+
 // Health check
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'UP', service: 'notification-service' });

@@ -26,6 +26,16 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   auth-service:
     build: ./auth-service
@@ -51,6 +61,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
+      REDIS_URL: redis://redis:6379/0
     depends_on:
       postgres:
         condition: service_healthy
@@ -61,6 +72,7 @@ services:
       - "3003:3003"
     environment:
       DATABASE_URL: postgres://postgres:password@postgres:5432/nexus_market
+      REDIS_URL: redis://redis:6379/0
     depends_on:
       postgres:
         condition: service_healthy
@@ -81,6 +93,7 @@ services:
       - "3005:3005"
     environment:
       DATABASE_URL: postgres://postgres:password@postgres:5432/nexus_market
+      REDIS_URL: redis://redis:6379/0
     depends_on:
       postgres:
         condition: service_healthy
