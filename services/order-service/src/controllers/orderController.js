@@ -19,7 +19,7 @@ const createOrder = async (req, res) => {
     }, 0);
 
     const order = await Order.create({
-      user_id: req.user.user_id,
+      user_id: String(req.user.user_id),
       items,
       shipping_address,
       total_amount,
@@ -51,7 +51,7 @@ const getUserOrders = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const query = { user_id: req.user.user_id };
+    const query = { user_id: String(req.user.user_id) };
 
     const [orders, total] = await Promise.all([
       Order.findAll({ 
@@ -88,7 +88,7 @@ const getOrderById = async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    if (order.user_id !== req.user.user_id && req.user.role !== 'admin') {
+    if (order.user_id !== String(req.user.user_id) && req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Unauthorized to access this order' });
     }
 
@@ -148,7 +148,7 @@ const cancelOrder = async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    if (order.user_id !== req.user.user_id) {
+    if (order.user_id !== String(req.user.user_id)) {
       return res.status(403).json({ error: 'Unauthorized to cancel this order' });
     }
 
