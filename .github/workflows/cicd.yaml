@@ -87,54 +87,74 @@ jobs:
       - name: setup docker buildx
         uses: docker/setup-buildx-action@v2
 
-    
-      - name: Build Auth Service
-        uses: docker/build-push-action@v5
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          context: ./services/auth-service
-          file: ./services/auth-service/Dockerfile
-          push: false
-          tags: nexusmarket/auth-service:latest
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Build catalog Service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./services/catalog-service
-          file: ./services/catalog-service/Dockerfile
-          push: false
-          tags: nexusmarket/catalog-service:latest
+      - name: Check AWS identity
+        run: |
+          aws sts get-caller-identity
 
-      - name: Build notification Service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./services/notification-service
-          file: ./services/notification-service/Dockerfile
-          push: false
-          tags: nexusmarket/notification-service:latest
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build order Service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./services/order-service
-          file: ./services/order-service/Dockerfile
-          push: false
-          tags: nexusmarket/order-service:latest  
+      - name: Set image prefix
+        run: |
+          echo "ECR_REGISTRY=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Build & Push Auth Service
+        run: |
+          docker build -t $ECR_REGISTRY/nexusmarket/auth-service:$IMAGE_TAG \
+                       -t $ECR_REGISTRY/nexusmarket/auth-service:latest \
+                       ./services/auth-service
+          docker push $ECR_REGISTRY/nexusmarket/auth-service:$IMAGE_TAG
+          docker push $ECR_REGISTRY/nexusmarket/auth-service:latest
+
+      - name: Build & Push Catalog Service
+        run: |
+          docker build -t $ECR_REGISTRY/nexusmarket/catalog-service:$IMAGE_TAG \
+                       -t $ECR_REGISTRY/nexusmarket/catalog-service:latest \
+                       ./services/catalog-service
+          docker push $ECR_REGISTRY/nexusmarket/catalog-service:$IMAGE_TAG
+          docker push $ECR_REGISTRY/nexusmarket/catalog-service:latest
       
-      - name: Build payment Service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./services/payment-service
-          file: ./services/payment-service/Dockerfile
-          push: false
-          tags: nexusmarket/payment-service:latest
-        
-      - name: Build frontend Service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./services/frontend
-          file: ./services/frontend/Dockerfile
-          push: false
-          tags: nexusmarket/frontend:latest
+      - name: Build & Push Order Service
+        run: |
+          docker build -t $ECR_REGISTRY/nexusmarket/order-service:$IMAGE_TAG \
+                       -t $ECR_REGISTRY/nexusmarket/order-service:latest \
+                       ./services/order-service
+          docker push $ECR_REGISTRY/nexusmarket/order-service:$IMAGE_TAG
+          docker push $ECR_REGISTRY/nexusmarket/order-service:latest   
       
-      - name: All services built successfully
-        run: echo " All services built successfully!"
+      - name: Build & Push Payment Service
+        run: |
+          docker build -t $ECR_REGISTRY/nexusmarket/payment-service:$IMAGE_TAG \
+                       -t $ECR_REGISTRY/nexusmarket/payment-service:latest \
+                       ./services/payment-service
+          docker push $ECR_REGISTRY/nexusmarket/payment-service:$IMAGE_TAG
+          docker push $ECR_REGISTRY/nexusmarket/payment-service:latest  
+      
+      - name: Build & Push Notification Service
+        run: |
+          docker build -t $ECR_REGISTRY/nexusmarket/notification-service:$IMAGE_TAG \
+                       -t $ECR_REGISTRY/nexusmarket/notification-service:latest \
+                       ./services/notification-service
+          docker push $ECR_REGISTRY/nexusmarket/notification-service:$IMAGE_TAG
+          docker push $ECR_REGISTRY/nexusmarket/notification-service:latest
+      
+      # ========== FRONTEND ==========
+      - name: Build & Push Frontend
+        run: |
+          docker build -t $ECR_REGISTRY/nexusmarket/frontend:$IMAGE_TAG \
+                       -t $ECR_REGISTRY/nexusmarket/frontend:latest \
+                       ./services/frontend
+          docker push $ECR_REGISTRY/nexusmarket/frontend:$IMAGE_TAG
+          docker push $ECR_REGISTRY/nexusmarket/frontend:latest
+
+      - name: All images pushed successfully
+        run: echo " All services built and pushed to ECR!"
+
