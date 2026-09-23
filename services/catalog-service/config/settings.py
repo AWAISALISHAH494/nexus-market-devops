@@ -41,7 +41,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'products',
+    'users',
 ]
+
+AUTH_USER_MODEL = 'users.User'
 
 
 
