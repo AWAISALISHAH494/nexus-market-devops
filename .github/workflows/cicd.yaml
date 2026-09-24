@@ -77,8 +77,10 @@ jobs:
           pip install -r requirements.txt
           python manage.py test
 
-  build:
+  build-and-push:
+    name: Build and Push Docker Images
     needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
