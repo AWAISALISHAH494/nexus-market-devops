@@ -1,0 +1,33 @@
+api-Version: apps/v1
+kind: Deployment
+
+metadata:
+  name: auth-service
+  labels:
+    app: auth-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: auth-service
+    template:
+      metadata:
+        labels:
+          app: auth-service
+      spec:
+        containers:
+          - name: auth-service
+            image: 045555583673.dkr.ecr.us-east-1.amazonaws.com/nexusmarket/auth-service:3eb142d426b696827ff6fafd935cdf866bf31eb4
+            ports:
+              - containerPort: 8000
+            env:
+              - name: POSTGRES_DB
+                value: "nexus_market"
+              - name: POSTGRES_USER
+                value: "postgres"
+              - name: POSTGRES_PASSWORD
+                value: "password"
+              - name: POSTGRES_HOST
+                value: "postgres"
+              - name: POSTGRES_PORT
+                value: "5432"
