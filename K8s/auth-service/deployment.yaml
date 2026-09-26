@@ -1,4 +1,4 @@
-api-Version: apps/v1
+apiVersion: apps/v1
 kind: Deployment
 
 metadata:
@@ -10,11 +10,14 @@ spec:
   selector:
     matchLabels:
       app: auth-service
-    template:
+  template:
       metadata:
         labels:
           app: auth-service
       spec:
+        imagePullSecrets:
+          - name: ecr-secret
+
         containers:
           - name: auth-service
             image: 045555583673.dkr.ecr.us-east-1.amazonaws.com/nexusmarket/auth-service:3eb142d426b696827ff6fafd935cdf866bf31eb4
