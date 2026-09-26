@@ -54,7 +54,7 @@ services:
   catalog-service:
     build: ./catalog-service
     ports:
-      - "8002:8000"          # Changed to 8000 inside container (standard)
+      - "8002:8000"         
     environment:
       POSTGRES_DB: nexus_market
       POSTGRES_USER: postgres
