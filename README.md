@@ -431,7 +431,7 @@ The project is being developed incrementally to cover the complete DevOps lifecy
 - [x] Notification service
 - [x] React frontend
 - [x] PostgreSQL integration
-- [ ] Redis integration
+- [x] Redis integration
 
 ### Phase 2 — Containerization
 
@@ -444,7 +444,7 @@ The project is being developed incrementally to cover the complete DevOps lifecy
 
 ### Phase 3 — CI/CD
 
-- [ ] GitHub Actions workflows
+- [x] GitHub Actions workflows
 - [ ] Automated testing
 - [ ] Code quality checks
 - [ ] Docker image builds
