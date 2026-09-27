@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: catalog-service
+  labels:
+    app: catalog-service
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: catalog-service
+  template:
+    metadata:
+      labels:
+        app: catalog-service
+    spec:
+      imagePullSecrets:
+        - name: ecr-secret
+      containers:
+        - name: catalog-service 
+          image: 045555583673.dkr.ecr.us-east-1.amazonaws.com/nexusmarket/catalog-service:8ec569b2d1d415a79342a8627ea22c0b0a59928a
+          ports:
+            - containerPort: 8000
+          env:
+            - name: POSTGRES_DB
+              value: "nexus_market"
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "password"
+            - name: POSTGRES_HOST
+              value: "postgres"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: REDIS_URL
+              value: "redis://redis:6379/0"
