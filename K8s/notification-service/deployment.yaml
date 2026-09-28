@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: notification-service
+  labels:
+    app: notification-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      imagePullSecrets:
+        - name: ecr-secret
+      containers:
+        - name: notification-service
+          image: 045555583673.dkr.ecr.us-east-1.amazonaws.com/nexusmarket/notification-service:6cb25eaa449c9dd01a4c09efd9179dc79a66b1fa
+          ports:
+            - containerPort: 8004
