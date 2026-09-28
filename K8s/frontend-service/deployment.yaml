@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: frontend-service
+  labels:
+    app: frontend-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend-service
+  template: 
+    metadata:
+      labels:
+        app: frontend-service
+    spec:
+      imagePullSecrets:
+        - name: ecr-secret
+      containers:
+        - name: frontend-service
+          image: 045555583673.dkr.ecr.us-east-1.amazonaws.com/nexusmarket/frontend:6cb25eaa449c9dd01a4c09efd9179dc79a66b1fa
+          ports:
+            - containerPort: 3000
