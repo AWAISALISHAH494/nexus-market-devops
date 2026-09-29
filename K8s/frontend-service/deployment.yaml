@@ -19,6 +19,6 @@ spec:
         - name: ecr-secret
       containers:
         - name: frontend-service
-          image: 045555583673.dkr.ecr.us-east-1.amazonaws.com/nexusmarket/frontend:6cb25eaa449c9dd01a4c09efd9179dc79a66b1fa
+          image: 045555583673.dkr.ecr.us-east-1.amazonaws.com/nexusmarket/frontend:92268f30d2292aff787f7ea8a771a11022558873
           ports:
-            - containerPort: 3000
+            - containerPort: 80
