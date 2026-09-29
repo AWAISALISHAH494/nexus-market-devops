@@ -28,11 +28,11 @@ api.interceptors.response.use(
   }
 );
 
-const AUTH_URL = 'http://localhost:8001/api/auth';
-const CATALOG_URL = 'http://localhost:8002/api/products';
-const ORDER_URL = 'http://localhost:3003/api/orders';
-const PAYMENT_URL = 'http://localhost:3004/api/payments';
-const NOTIFICATION_URL = 'http://localhost:3005/api/notifications';
+const AUTH_URL = '/api/auth';
+const CATALOG_URL = '/api/products';
+const ORDER_URL = '/api/orders';
+const PAYMENT_URL = '/api/payments';
+const NOTIFICATION_URL = '/api/notifications';
 
 export const authAPI = {
   login: (data) => api.post(`${AUTH_URL}/login/`, data),
