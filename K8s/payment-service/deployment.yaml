@@ -22,3 +22,8 @@ spec:
           image: 045555583673.dkr.ecr.us-east-1.amazonaws.com/nexusmarket/payment-service:6cb25eaa449c9dd01a4c09efd9179dc79a66b1fa
           ports:
             - containerPort: 8006
+          env:
+            - name: DATABASE_URL
+              value: "postgres://postgres:password@postgres-nexus:5432/nexus_market"
+            - name: REDIS_URL
+              value: "redis://redis-service:6379/0"

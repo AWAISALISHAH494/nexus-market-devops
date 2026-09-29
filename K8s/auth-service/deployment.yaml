@@ -31,6 +31,6 @@ spec:
               - name: POSTGRES_PASSWORD
                 value: "password"
               - name: POSTGRES_HOST
-                value: "postgres"
+                value: "postgres-nexus"
               - name: POSTGRES_PORT
                 value: "5432"
