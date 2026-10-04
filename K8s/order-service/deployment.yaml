@@ -19,10 +19,13 @@ spec:
         - name: ecr-secret
       containers:
         - name: order-service
-          image: 045555583673.dkr.ecr.us-east-1.amazonaws.com/nexusmarket/order-service:6cb25eaa449c9dd01a4c09efd9179dc79a66b1fa
+          image: 045555583673.dkr.ecr.us-east-1.amazonaws.com/nexusmarket/order-service:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8005
           env:
+            - name: PORT
+              value: "8005"
             - name: DATABASE_URL
               value: "postgres://postgres:password@postgres-nexus:5432/nexus_market"
             - name: REDIS_URL

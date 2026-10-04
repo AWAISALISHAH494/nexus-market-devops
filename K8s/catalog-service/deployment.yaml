@@ -20,7 +20,8 @@ spec:
         - name: ecr-secret
       containers:
         - name: catalog-service 
-          image: 045555583673.dkr.ecr.us-east-1.amazonaws.com/nexusmarket/catalog-service:8ec569b2d1d415a79342a8627ea22c0b0a59928a
+          image: 045555583673.dkr.ecr.us-east-1.amazonaws.com/nexusmarket/catalog-service:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8000
           env:
