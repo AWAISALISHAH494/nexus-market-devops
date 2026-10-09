@@ -148,7 +148,6 @@ jobs:
           docker push $ECR_REGISTRY/nexusmarket/notification-service:$IMAGE_TAG
           docker push $ECR_REGISTRY/nexusmarket/notification-service:latest
       
-      # ========== FRONTEND ==========
       - name: Build & Push Frontend
         run: |
           docker build -t $ECR_REGISTRY/nexusmarket/frontend:$IMAGE_TAG \
