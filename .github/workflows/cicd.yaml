@@ -159,3 +159,56 @@ jobs:
       - name: All images pushed successfully
         run: echo " All services built and pushed to ECR!"
 
+  deploy:
+    name: Deploy to EKS
+    needs: build-and-push
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.30.0'
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --name YOUR_EKS_CLUSTER_NAME \
+            --region ${{ secrets.AWS_REGION }}
+
+      - name: Deploy - Update image tags
+        run: |
+          ECR_REGISTRY="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com"
+          IMAGE_TAG="${{ github.sha }}"
+
+          echo "Updating deployments with image tag: $IMAGE_TAG"
+
+          kubectl set image deployment/auth-service auth-service=$ECR_REGISTRY/nexusmarket/auth-service:$IMAGE_TAG --record
+          kubectl set image deployment/catalog-service catalog-service=$ECR_REGISTRY/nexusmarket/catalog-service:$IMAGE_TAG --record
+          kubectl set image deployment/order-service order-service=$ECR_REGISTRY/nexusmarket/order-service:$IMAGE_TAG --record
+          kubectl set image deployment/payment-service payment-service=$ECR_REGISTRY/nexusmarket/payment-service:$IMAGE_TAG --record
+          kubectl set image deployment/notification-service notification-service=$ECR_REGISTRY/nexusmarket/notification-service:$IMAGE_TAG --record
+          kubectl set image deployment/frontend frontend=$ECR_REGISTRY/nexusmarket/frontend:$IMAGE_TAG --record
+
+      - name: Wait for rollouts to complete
+        run: |
+          kubectl rollout status deployment/auth-service --timeout=120s
+          kubectl rollout status deployment/catalog-service --timeout=120s
+          kubectl rollout status deployment/order-service --timeout=120s
+          kubectl rollout status deployment/payment-service --timeout=120s
+          kubectl rollout status deployment/notification-service --timeout=120s
+          kubectl rollout status deployment/frontend --timeout=120s
+
+      - name: Deployment successful
+        run: echo "All services successfully deployed to EKS!"
