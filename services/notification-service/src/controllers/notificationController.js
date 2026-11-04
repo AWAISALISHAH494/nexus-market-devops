@@ -1,3 +1,4 @@
+const escapeHtml = require('escape-html');
 const Notification = require('../models/Notification');
 const emailService = require('../services/emailService');
 
@@ -24,10 +25,12 @@ const sendNotification = async (req, res, next) => {
           emailContent = emailService.getOrderStatusEmail(data, data?.status || type);
           break;
         default:
-          emailContent = {
-            subject: title,
-            html: `<p>${message}</p>`
-          };
+  emailContent = {
+    subject: String(title || 'Nexus Market Notification')
+      .replace(/[\r\n]/g, ' ')
+      .slice(0, 200),
+    html: `<p>${escapeHtml(String(message || ''))}</p>`
+  };
       }
 
       if (emailContent) {
