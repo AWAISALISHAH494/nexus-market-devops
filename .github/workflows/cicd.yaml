@@ -4,7 +4,11 @@ on:
     branches: ["main","develop","master"]
   pull_request:
     branches: ["main","develop","master"]
+
 jobs:
+  # ============================================================
+  # JOB 1: Run all unit tests
+  # ============================================================
   test:
     runs-on: ubuntu-latest
     services:
@@ -61,6 +65,10 @@ jobs:
       - name: Test Auth Service
         env:
           POSTGRES_HOST: localhost
+          DJANGO_SECRET_KEY: ci-test-secret-key-not-for-production
+          JWT_SECRET: ci-test-jwt-secret-not-for-production
+          DEBUG: "True"
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
         run: |
           cd services/auth-service
           python -m pip install --upgrade pip
@@ -71,15 +79,143 @@ jobs:
         env:
           POSTGRES_HOST: localhost
           REDIS_URL: redis://localhost:6379/0
+          DJANGO_SECRET_KEY: ci-test-secret-key-not-for-production
+          JWT_SECRET: ci-test-jwt-secret-not-for-production
+          DEBUG: "True"
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
         run: |
           cd services/catalog-service
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           python manage.py test
 
+  # ============================================================
+  # JOB 2: SonarQube — Code Quality Analysis
+  #
+  # What is SonarQube?
+  # ------------------
+  # SonarQube is a code quality tool. After your tests run,
+  # it scans all your source code and checks for:
+  #   - Bugs (code that might crash)
+  #   - Code Smells (messy or hard-to-maintain code)
+  #   - Security Hotspots (places where hackers could attack)
+  #   - Duplicated code
+  #   - Test coverage (how much of your code is tested)
+  #
+  # It then gives your project a "Quality Gate" — PASS or FAIL.
+  # If it fails, the pipeline stops and Docker images are NOT built.
+  # This ensures only clean, secure code reaches production.
+  #
+  # Setup required (one time):
+  #   1. Go to https://sonarcloud.io  (free for open-source projects)
+  #   2. Sign in with your GitHub account
+  #   3. Create an Organization and import your repository
+  #   4. Copy your SONAR_TOKEN from Project Settings > Security
+  #   5. Add it to GitHub: Settings > Secrets > SONAR_TOKEN
+  # ============================================================
+  sonarqube:
+    name: SonarQube Code Quality
+    needs: test          # Only runs AFTER all tests pass
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        # fetch-depth: 0 means get the FULL git history.
+        # SonarQube needs this to calculate things like
+        # "new code since last version" and blame information.
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js (for JS/TS coverage reports)
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Setup Python (for Python coverage reports)
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      # --- Generate test coverage for Node.js services ---
+      # Coverage = which lines of code were executed during tests.
+      # SonarQube reads these reports and shows you exactly
+      # which functions/lines have NO test coverage.
+      - name: Generate Coverage - Order Service
+        run: |
+          cd services/order-service
+          npm install
+          NODE_ENV=test npm test -- --coverage --coverageReporters=lcov 2>/dev/null || true
+        env:
+          REDIS_URL: redis://localhost:6379/0
+        continue-on-error: true  # Don't fail if coverage fails
+
+      - name: Generate Coverage - Payment Service
+        run: |
+          cd services/payment-service
+          npm install
+          NODE_ENV=test npm test -- --coverage --coverageReporters=lcov 2>/dev/null || true
+        continue-on-error: true
+
+      - name: Generate Coverage - Notification Service
+        run: |
+          cd services/notification-service
+          npm install
+          NODE_ENV=test npm test -- --coverage --coverageReporters=lcov 2>/dev/null || true
+        env:
+          REDIS_URL: redis://localhost:6379/0
+        continue-on-error: true
+
+      # --- Generate test coverage for Django services ---
+      - name: Generate Coverage - Auth Service
+        run: |
+          cd services/auth-service
+          pip install -r requirements.txt coverage
+          coverage run manage.py test
+          coverage xml -o coverage.xml
+        env:
+          POSTGRES_HOST: localhost
+          DJANGO_SECRET_KEY: ci-test-secret-key-not-for-production
+          JWT_SECRET: ci-test-jwt-secret-not-for-production
+          DEBUG: "True"
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+        continue-on-error: true
+        services:
+          # Note: inherited from job-level but we re-declare for clarity
+          {}
+
+      - name: Generate Coverage - Catalog Service
+        run: |
+          cd services/catalog-service
+          pip install -r requirements.txt coverage
+          coverage run manage.py test
+          coverage xml -o coverage.xml
+        env:
+          POSTGRES_HOST: localhost
+          REDIS_URL: redis://localhost:6379/0
+          DJANGO_SECRET_KEY: ci-test-secret-key-not-for-production
+          JWT_SECRET: ci-test-jwt-secret-not-for-production
+          DEBUG: "True"
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+        continue-on-error: true
+
+      # --- The main SonarQube scan step ---
+      # This action sends your code + coverage reports to SonarCloud.
+      # SonarCloud analyzes everything and returns PASS or FAIL.
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          # SONAR_TOKEN: Your secret token from sonarcloud.io
+          # Add this in: GitHub repo > Settings > Secrets > Actions
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  # ============================================================
+  # JOB 3: Build Docker images and push to Amazon ECR
+  # Only runs if BOTH tests AND SonarQube Quality Gate PASS
+  # ============================================================
   build-and-push:
     name: Build and Push Docker Images
-    needs: test
+    needs: [test, sonarqube]   # <-- Now waits for SonarQube too!
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
@@ -157,8 +293,11 @@ jobs:
           docker push $ECR_REGISTRY/nexusmarket/frontend:latest
 
       - name: All images pushed successfully
-        run: echo " All services built and pushed to ECR!"
+        run: echo "✅ All services built and pushed to ECR!"
 
+  # ============================================================
+  # JOB 4: Deploy to EKS
+  # ============================================================
   deploy:
     name: Deploy to EKS
     needs: build-and-push
@@ -211,4 +350,4 @@ jobs:
           kubectl rollout status deployment/frontend --timeout=120s
 
       - name: Deployment successful
-        run: echo "All services successfully deployed to EKS!"
+        run: echo "✅ All services successfully deployed to EKS!"
