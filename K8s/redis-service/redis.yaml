@@ -14,11 +14,53 @@ spec:
       labels:
         app: redis
     spec:
+      # Pod-level: redis:alpine uses uid 999 (redis user)
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+
       containers:
         - name: redis
           image: redis:7-alpine
           ports:
             - containerPort: 6379
+          command: ["redis-server", "--appendonly", "yes"]
+          # Container-level security hardening
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false   # Redis needs write access for AOF persistence
+            runAsNonRoot: true
+            runAsUser: 999
+            capabilities:
+              drop:
+                - ALL
+          # Resource limits (CPU & Memory)
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          # Liveness probe
+          livenessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            failureThreshold: 3
+          # Readiness probe
+          readinessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 5
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service

@@ -15,6 +15,13 @@ spec:
         app: postgres
 
     spec:
+      # Pod-level: Postgres official image uses uid 999 (postgres user)
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+
       containers:
         - name: postgres
           image: postgres:15
@@ -44,6 +51,46 @@ spec:
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
+
+          # Container-level security hardening
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false   # Postgres needs write access to data dir
+            runAsNonRoot: true
+            runAsUser: 999
+            capabilities:
+              drop:
+                - ALL
+
+          # Resource limits (CPU & Memory)
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+
+          # Liveness probe
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 5
+
+          # Readiness probe
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
+            initialDelaySeconds: 10
+            periodSeconds: 10
 
       volumes:
         - name: postgres-storage
